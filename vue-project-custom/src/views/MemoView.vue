@@ -33,9 +33,9 @@
         <li :key="i" v-for="(item, i) in memoList" class="memo-item">
           <div class="memo-content">{{ item.contents }}</div>
           <div class ="info-value">
-            <button type="button" class="edit" @click="editMemo(i)">수정</button>
-            <button type="button" class="delete" @click="deleteMemo(i)">삭제</button>
-            <button type="button" class="complete" @click="completeMemo(i)">완료</button>
+            <button type="button" class="edit" @click="editMemo(item.idx)">수정</button>
+            <button type="button" class="delete" @click="deleteMemo(item.idx)">삭제</button>
+            <button type="button" class="complete" @click="completeMemo(item.idx)">완료</button>
           </div>
         </li>
       </ul>
@@ -107,25 +107,48 @@ export default {
     };
   },
   methods: {
+    setDate () {
+      const date = new Date();
+      const year = date.getFullYear();
+      const month = ('0' + (date.getMonth() + 1)).slice(-2);
+      const day = ('0' + date.getDate()).slice(-2);
+      return `'${year}-${month}-${day}'`;
+    },
     addMemo () {
       if (this.newMemo.trim() !== '') {
-        this.memoList.push(this.newMemo);
+        const getDate = this.setDate();
+        const addData = {
+          idx: this.memoList.length + 1,
+          name: '홍길동',
+          priority: 0,
+          category: '',
+          contents: this.newMemo,
+          created_at: getDate,
+          updated_at: getDate
+        };
+        this.memoList.push(addData);
         this.newMemo = '';
       }
     },
     editMemo (idx) {
       this.editIndex = idx;
-      this.editedMemo = this.memoList[idx];
+      this.editedMemo = this.memoList.find(memo => memo.idx === idx).contents;
     },
     updateMemo () {
       if (this.editedMemo.trim() !== '') {
-        this.memoList[this.editIndex] = this.editedMemo;
-        this.editedMemo = '';
+        const item = this.memoList.find(memo => memo.idx === this.editIndex);
+        item.contents = this.editedMemo;
+        item.updated_at = this.setDate();
         this.editIndex = null;
+        this.editedMemo = '';
       }
     },
     deleteMemo (idx) {
       if (confirm('메모삭제')) {
+        const index = this.memoList.findIndex(memo => memo.idx === idx);
+        if (index) {
+          this.memoList.splice(index, 1);
+        }
         this.memoList.splice(idx, 1);
       }
     },
