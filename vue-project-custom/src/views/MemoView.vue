@@ -1,10 +1,10 @@
 <template>
   <h2>Memo app</h2>
   중요도:
-  <input type="checkbox">
+  <input type="checkbox" v-model= "priorityVal">
   &emsp;
   카테고리:
-  <select>
+  <select v-model ="categoryVal">
     <option value="개인" selected>개인</option>
     <option value="업무">업무</option>
     <option value="일정">일정</option>
@@ -22,7 +22,7 @@
     <h2>Search Result</h2>
     <ul>
       <li :key="i" v-for="(item, i) in foundMemoList">
-        <span>{{ item }}</span>
+        <span>{{ item.contents }}</span>
       </li>
     </ul>
   </div>
@@ -32,7 +32,24 @@
       <ul v-if="memoList.length > 0" class="memo-list">
         <li :key="i" v-for="(item, i) in memoList" class="memo-item">
           <div class="memo-content">{{ item.contents }}</div>
-          <div class ="info-value">
+            <div class="meom-info">
+              <div class="info">
+                <span class="category">
+                  <i class="fas fa-folder"></i>
+                </span>
+                <span class ="info-value">{{ item.category }}</span>
+              </div>
+            </div>
+            <div class="info">
+              <span class="priority">
+                <i class="fas fa-exclamation-circle"></i>
+              </span>
+              <span class="info-value">
+                <i v-if="item.priorty ===1" class="fas fa-star"></i>
+                <i v-else class="far fa-star"></i>
+              </span>
+            </div>
+          <div class ="memo-actions">
             <button type="button" class="edit" @click="editMemo(item.idx)">수정</button>
             <button type="button" class="delete" @click="deleteMemo(item.idx)">삭제</button>
             <button type="button" class="complete" @click="completeMemo(item.idx)">완료</button>
@@ -53,12 +70,35 @@
 
   <div>
     <h2>Complete List</h2>
-    <!-- <ul>
-      <li :key="i" v-for="(item, i) in completeList">
-        <span>{{ item }}</span>
-        <button type="button" class="cancle" @click="cancleMemo(i)">취소</button>
+    <ul v-if="completeList.length > 0" class="memo-list">
+      <li v-for="item in completeList" :key="item.idx" class="memo-item">
+        <div class="memo-content">
+          <p>{{ item.contents }}</p>
+        </div>
+        <div class="memo-info">
+          <div class="info">
+            <span class="category">
+              <i class="fas fa-folder"></i>
+            </span>
+            <span class="info-value">{{ item.category }}</span>
+          </div>
+          <div class="info">
+            <span class="priority">
+              <i class="fas fa-exclamation-circle"></i>
+            </span>
+            <span class="info-value">
+              <i v-if="item.priority === 1" class="fas fa-star"></i>
+              <i v-else class="far fa-star"></i>
+            </span>
+          </div>
+        </div>
+        <div class="memo-actions">
+          <button class="cancle" @click="cancleMemo(item.idx)">취소</button>
+        </div>
       </li>
-    </ul> -->
+    </ul>
+    <span v-else>아직 완료된 메모가 없습니다.</span>
+    </div>
     <div>
       <ul v-if="completeList.length > 0" class="memo-list">
         <li :key="i" v-for="(item, i) in completeList" class="memo-item">
@@ -70,7 +110,6 @@
       </ul>
       <span v-else>완료한 메모 내용이 없습니다.</span>
     </div>
-  </div>
   <div v-if="editIndex !== null" class="edit-modal">
     <div class="edit-modal-content">
       <button type="button" class="close" @click="closeModal">X</button>
@@ -97,6 +136,15 @@ export default {
         contents: '첫 번째 메모',
         created_at: '2024-03-28',
         updated_at: '2024-03-28'
+      },
+      {
+        idx: 2,
+        name: '홍길동',
+        priority: 0,
+        category: '업무',
+        contents: '두 번째 메모',
+        created_at: '2024-03-28',
+        updated_at: '2024-03-28'
       }],
       completeList: [],
       isFind: false,
@@ -120,8 +168,8 @@ export default {
         const addData = {
           idx: this.memoList.length + 1,
           name: '홍길동',
-          priority: 0,
-          category: '',
+          priority: this.priorityVal,
+          category: this.categoryVal,
           contents: this.newMemo,
           created_at: getDate,
           updated_at: getDate
@@ -146,24 +194,38 @@ export default {
     deleteMemo (idx) {
       if (confirm('메모삭제')) {
         const index = this.memoList.findIndex(memo => memo.idx === idx);
-        if (index) {
+        if (index !== -1) {
           this.memoList.splice(index, 1);
         }
         this.memoList.splice(idx, 1);
       }
     },
     completeMemo (idx) {
-      this.completeList.push(this.memoList[idx]);
-      this.memoList.splice(idx, 1);
+      const item = this.memoList.find(memo => memo.idx === idx);
+      this.completeList.push(item);
+      const index = this.memoList.findIndex(memo => memo.idx === idx);
+      if (index !== -1) {
+        this.memoList.splice(index, 1);
+      }
     },
     cancleMemo (idx) {
       if (confirm('기존 메모리스트로 이동하시겠습니까?')) {
-        this.memoList.push(this.completeList[idx]);
-        this.completeList.splice(idx, 1);
+        const item = this.completeList.find(memo => memo.idx === idx);
+        this.memoList.push(item);
+        const index = this.completeList.findIndex(memo => memo.idx === idx);
+        if (index !== -1) {
+          this.completeList.splice(index, 1);
+        }
       }
     },
     findMemo () {
-      this.foundMemoList = this.memoList.filter((item) => item.includes(this.searchMemo)); // 검색
+      this.foundMemoList = [];
+      const searchMemo = this.memoList.filter((item) => item.contents.includes(this.searchMemo)); // 검색
+      if (searchMemo.length > 0) {
+        this.foundMemoList = searchMemo;
+      } else {
+        alert('검색 결과가 없습니다.');
+      }
     },
     toggleSearch () {
       this.isFind = !this.isFind; // 토글
@@ -274,9 +336,8 @@ button.cancle {
 }
 
 .edit-modal-content input[type="text"] {
-
-  /* width: 100%; */
-  &.modal-input {
+  width: 100%;
+  &.modal-input{
     width: 70%;
   }
 }
@@ -291,5 +352,60 @@ button.cancle {
   right: 0;
   background: none;
   color: rgba(0, 0, 0, 0.5);
+}
+
+.memo-list {
+  list-style: none;
+  padding: 0;
+}
+
+.memo-item {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.memo-content p {
+  margin: 0;
+}
+
+.memo-info {
+  display: flex;
+  align-items: center;
+}
+
+.info {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.info-value {
+  margin-left: 5px;
+}
+
+.priority i {
+  color: #f39c12;
+}
+
+.fa-star, .fa-exclamation-circle, .fa-folder {
+  font-size: 18px;
+}
+
+.memo-actions button {
+  padding: 5px 10px;
+  margin-left: 10px;
+  border: none;
+  background-color: #1D4D9F;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.memo-actions button:hover {
+  background-color: #0E3A7F;
 }
 </style>
