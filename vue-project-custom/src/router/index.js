@@ -7,6 +7,8 @@ import EventView from '../views/EventView.vue';
 import ComputedView from '../views/ComputedView.vue';
 import WatchView from '../views/WatchView.vue';
 import MemoView from '../views/MemoView.vue';
+import NestedComponent from '../views/NestedComponent.vue';
+import ParentComponent from '../views/ParentComponent.vue';
 
 const routes = [
   {
@@ -48,6 +50,16 @@ const routes = [
     path: '/memo',
     name: 'memo',
     component: MemoView
+  },
+  {
+    path: '/nestedcomponent',
+    name: 'nestedcomponent',
+    component: NestedComponent
+  },
+  {
+    path: '/parentcomponent',
+    name: 'parentcomponent',
+    component: ParentComponent
   },
   {
     path: '/about',
