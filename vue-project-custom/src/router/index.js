@@ -9,6 +9,9 @@ import WatchView from '../views/WatchView.vue';
 import MemoView from '../views/MemoView.vue';
 import NestedComponent from '../views/NestedComponent.vue';
 import ParentComponent from '../views/ParentComponent.vue';
+import SlotModalLayoutView from '../views/SlotModalLayoutView.vue';
+import ProvideInject from '../views/ProvideInject.vue';
+import MemoComponentsView from '../views/MemoComponentsView.vue';
 
 const routes = [
   {
@@ -60,6 +63,21 @@ const routes = [
     path: '/parentcomponent',
     name: 'parentcomponent',
     component: ParentComponent
+  },
+  {
+    path: '/slotmodallayout',
+    name: 'slotmodallayout',
+    component: SlotModalLayoutView
+  },
+  {
+    path: '/provideinject',
+    name: 'provideinject',
+    component: ProvideInject
+  },
+  {
+    path: '/memocomponents',
+    name: 'memocomponents',
+    component: MemoComponentsView
   },
   {
     path: '/about',
